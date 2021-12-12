@@ -3,6 +3,7 @@
 # https://adventofcode.com/2021/day/9
 
 use 5.26.0;
+use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures';
 

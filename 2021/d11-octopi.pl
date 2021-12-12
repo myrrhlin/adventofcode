@@ -3,6 +3,7 @@
 # https://adventofcode.com/2021/day/11
 
 use 5.26.0;
+use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures';
 
@@ -25,7 +26,7 @@ my $stopsync = $opt{sync};
 my $stoptime = $opt{time};
 $stoptime ||= 100 unless $stopsync;
 
-my %cnt;
+my %cnt = (flash => 0);
 
 my $file = $ARGV[0] || 'd11.lis';
 
