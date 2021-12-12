@@ -3,6 +3,7 @@
 # https://adventofcode.com/2021/day/12
 
 use 5.26.0;
+use warnings;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures';
 use autodie;
@@ -19,6 +20,7 @@ GetOptions(\%opt,
   'v|verbose',
   'doublesmall',
 ) or die "couldn't parse options: @ARGV";
+$opt{doublesmall} //= 0;
 
 my $file = $ARGV[0] || 'd12.lis';
 
@@ -45,7 +47,7 @@ foreach my $line (@lines) {
   }
 }
 
-# given a current (in-progress) path, list possible nodes for next link
+# given a path (in-progress), list possible nodes for next link
 sub nextlinks {
   my @branch = @_;
   my %cnt;
@@ -53,8 +55,8 @@ sub nextlinks {
   my $small_repeated = grep {$cnt{$_} > 1} grep /^[a-z]+$/, keys %cnt;
   my $tail = $branch[-1];
   my @smalls = grep !/^start$/, grep /^[a-z]+$/, $link{$tail}->@*;
-  my @nexts = grep /^[A-Z]+$/, $link{$tail}->@*;  # larges first
-  push @nexts, grep {$cnt{$_} + $small_repeated < 1 + $opt{doublesmall}} @smalls;
+  my @nexts  = grep /^[A-Z]+$/, $link{$tail}->@*;  # larges first
+  push @nexts, grep {($cnt{$_}//0) + $small_repeated < 1 + $opt{doublesmall}} @smalls;
   say join('-',@branch), ' +(',join('|',@nexts),')' if $opt{v};
   return @nexts;
 }

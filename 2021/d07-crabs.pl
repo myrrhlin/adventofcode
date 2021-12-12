@@ -3,9 +3,9 @@
 # https://adventofcode.com/2021/day/7
 
 use 5.26.0;
+use warnings;
 use feature 'signatures';
 no warnings 'experimental::signatures';
-
 use autodie;
 
 use Getopt::Long;
@@ -20,10 +20,9 @@ GetOptions(\%opt,
   'part2',   # select part 2's fuel cost
 ) or die "couldn't parse options: @ARGV";
 
-my %cnt;
-
 my $file = $ARGV[0] || 'd07.lis';
 
+my %cnt;
 $cnt{_lines} = my @lines = grep /^\d/, $opt{test} ? 
   do {local $/; split /\n/, <DATA>} 
   : path($file)->lines({chomp => 1});
@@ -32,11 +31,6 @@ my @pos = map {split /,/,$_} @lines;
 say scalar(@pos), " crabs at initial positions: @pos";
 my %fuel;  # record total fuel spent for a given end position
 
-sub fcost ($dist) {
-  state @costs;
-  @costs = (1) unless @costs;
-  return my $cost = $costs[$dist-1] ||= fcost($dist -1) + $dist;
-}
 sub binomial ($dist) {  # same result as fcost function
   use integer;
   return $dist * ($dist+1) /2;
@@ -45,7 +39,7 @@ sub binomial ($dist) {  # same result as fcost function
 sub fuel_of ($middle) {
   my @dist = map {abs($_ - $middle)} @pos;
   my $fuel = $opt{part2}
-    ? sum0 map {fcost($_)} @dist
+    ? sum0 map {binomial($_)} @dist
     : sum0 @dist;
   $fuel{$middle} = $fuel;
   say "for final position $middle  total fuel: $fuel";
@@ -53,12 +47,23 @@ sub fuel_of ($middle) {
   return $fuel;
 }
 
-my $sum = sum0 @pos;
-my $avg = int $sum / scalar(@pos);  # starting guess
+sub guess (@data) {
+  use integer;
+  if ($opt{part2}) {
+    # mean
+    my $sum = sum0 @data;
+    return $sum / scalar(@data);
+  }
+  # median
+  my @list = sort {$a <=> $b} @data;
+  return $list[(@list-1)/2];
+}
 
-my $delta = (fuel_of($avg+1) > fuel_of($avg)) ? -1 : 1;
 
-my $minpos = my $middle = $avg;
+my $guess = guess(@pos); # starting guess
+my $delta = (fuel_of($guess+1) > fuel_of($guess)) ? -1 : 1;
+
+my $minpos = my $middle = $guess;
 while (1) {
   my $oldfuel = $fuel{$middle};
   $middle += $delta;

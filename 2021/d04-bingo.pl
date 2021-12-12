@@ -3,19 +3,28 @@
 # https://adventofcode.com/2021/day/4
 
 use 5.26.0;
+use warnings;
 use feature 'signatures';
 no warnings 'experimental::signatures';
+use autodie;
 
+use Getopt::Long;
 use Path::Tiny;
 use Carp::Always;
 use Data::Printer;
 use List::Util 'sum0', 'reduce';
 
-my %cnt;
+my %opt;
+GetOptions(\%opt,
+  'test',
+) or die "couldn't parse options: @ARGV";
 
 my $file = $ARGV[0] || 'd04.lis';
-my @lines = grep !m/^#/, path($file)->lines({chomp => 1});
-$cnt{_lines} = @lines;
+
+my %cnt;
+$cnt{_lines} = my @lines = grep !/^#/, $opt{test} ?
+  do {local $/; split /\n/, <DATA>}
+  : path($file)->lines({chomp => 1});
 
 # a "board" is an arrayref of (probably) 25 different positive integers.
 # as numbers are called, we'll mark out numbers on each board

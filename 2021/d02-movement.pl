@@ -3,6 +3,7 @@
 # https://adventofcode.com/2021/day/2
 
 use 5.26.0;
+use warnings;
 
 use Path::Tiny;
 use Data::Printer;
@@ -21,7 +22,7 @@ foreach (path($file)->lines) {
   } elsif ($dir eq 'down') {
     $cnt{aim} += $dist;
   } elsif ($dir eq 'forward') {
-    $cnt{depth_b} += $cnt{aim}*$dist;
+    $cnt{depth_b} += ($cnt{aim}//0) * $dist;
   }
 }
 $cnt{depth_a} = $cnt{d_down}-$cnt{d_up};

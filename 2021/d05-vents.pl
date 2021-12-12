@@ -3,23 +3,32 @@
 # https://adventofcode.com/2021/day/5
 
 use 5.26.0;
+use warnings;
 use feature 'signatures';
 no warnings 'experimental::signatures';
-
 use autodie;
 
+use Getopt::Long;
 use Path::Tiny;
 use Carp::Always;
 use Data::Printer;
 use List::Util 'sum0', 'max';
 
-my $do_diagonals = 1;
-
-my %cnt;
+my %opt;
+GetOptions(\%opt,
+  'test',
+  'v|verbose',
+  'diagonals',
+) or die "couldn't parse options: @ARGV";
+my $do_diagonals = $opt{diagonals};
 
 my $file = $ARGV[0] || 'd05.lis';
-my @lines = grep /^\d/, path($file)->lines({chomp => 1});
-$cnt{_lines} = @lines;
+
+my %cnt;
+$cnt{_lines} = my @lines = grep /^\d/, $opt{test} ?
+  do {local $/; split /\n/, <DATA>}
+  : path($file)->lines({chomp => 1});
+
 
 my @vents;
 for (@lines) {
@@ -80,11 +89,11 @@ sub drawvent ($vent) {
     plot($x1, $y1);
     last unless @ds;
     last if $x1 == $x2 && $y1 == $y2;
-    ($x1, $y1) = ($x1 + $ds[0]//0, $y1 + $ds[1]//0);
+    ($x1, $y1) = ($x1 +($ds[0]//0), $y1 + ($ds[1]//0));
   }
 }
 sub overlaps ($threshold = 2) {
-  my $cnt = grep {$_ >= $threshold} map {@$_} @$graph;
+  my $cnt = grep {($_||0) >= $threshold} map {@$_} @$graph;
 }
 
 p %cnt;
