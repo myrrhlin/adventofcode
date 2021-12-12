@@ -5,7 +5,6 @@
 use 5.26.0;
 use feature 'signatures', 'postderef';
 no warnings 'experimental::signatures';
-
 use autodie;
 
 use Getopt::Long;
@@ -32,10 +31,8 @@ my %link;  # list of edges connected to each node
 my @paths; # valid paths to end
 
 sub nodily {
-  return -1 if $a eq 'start';
-  return 1 if $b eq 'start';
-  return -1 if $b eq 'end';
-  return 1 if $a eq 'end';
+  return -1 if $a eq 'start' || $b eq 'end';
+  return 1 if $a eq 'end' || $b eq 'start';
   return $a cmp $b;
 }
 
@@ -57,7 +54,7 @@ sub nextlinks {
   my $tail = $branch[-1];
   my @smalls = grep !/^start$/, grep /^[a-z]+$/, $link{$tail}->@*;
   my @nexts = grep /^[A-Z]+$/, $link{$tail}->@*;  # larges first
-  push @nexts = grep {$cnt{$_} + $small_repeated < 1 + $opt{doublesmall}} @smalls;
+  push @nexts, grep {$cnt{$_} + $small_repeated < 1 + $opt{doublesmall}} @smalls;
   say join('-',@branch), ' +(',join('|',@nexts),')' if $opt{v};
   return @nexts;
 }
